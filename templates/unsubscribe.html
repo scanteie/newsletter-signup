@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Unsubscribe from Newsletter{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Unsubscribe from Newsletter</h1>
+    <p>We're sorry to see you go. Please enter your email address to unsubscribe from our newsletter.</p>
+    
+    <form method="POST">
+        <div class="form-group">
+            <input type="email" name="email" id="email" placeholder="Enter your email address" required>
+        </div>
+        
+        <button type="submit">Unsubscribe</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <div class="header-top">
+            <h1>Newsletter Subscribers</h1>
+            <a href="{{ url_for('export') }}" class="button">Export to CSV</a>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-button active" onclick="showTab('all')">All</button>
+        <button class="tab-button" onclick="showTab('subscribed')">Subscribed</button>
+        <button class="tab-button" onclick="showTab('unsubscribed')">Unsubscribed</button>
+    </div>
+
+    <div class="admin-content">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search emails..." onkeyup="filterTable()">
+        </div>
+
+        <div class="table-container">
+            <table id="subscribersTable">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Subscribed On</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subscriber in subscribers %}
+                    <tr data-status="{{ subscriber.status }}">
+                        <td>{{ subscriber.email }}</td>
+                        <td>
+                            <span class="status-badge status-{{ subscriber.status }}">
+                                {{ subscriber.status }}
+                            </span>
+                        </td>
+                        <td>{{ subscriber.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ subscriber.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-header {
+    margin-bottom: 20px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header-top h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #2d3748;
+}
+
+.tabs {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.tab-button {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 12px 24px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #718096;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.tab-button:hover {
+    border-color: #4a90e2;
+    color: #4a90e2;
+}
+
+.tab-button.active {
+    background: #4a90e2;
+    color: white;
+    border-color: #4a90e2;
+}
+
+.admin-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+}
+
+.search-box {
+    margin-bottom: 24px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.table-container {
+    overflow: hidden;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #f7fafc;
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #4a5568;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+td {
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status-subscribed {
+    background: #c6f6d5;
+    color: #276749;
+}
+
+.status-unsubscribed {
+    background: #fed7d7;
+    color: #9b2c2c;
+}
+
+.button {
+    background: #4a90e2;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background: #357abd;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentTab = 'all';
+
+function showTab(tabName) {
+    currentTab = tabName;
+    
+    // Update active tab button
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+        if (button.textContent.toLowerCase().includes(tabName)) {
+            button.classList.add('active');
+        }
+    });
+
+    // Filter table rows
+    filterTable();
+}
+
+function filterTable() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toLowerCase();
+    const table = document.getElementById('subscribersTable');
+    const rows = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const emailCell = row.getElementsByTagName('td')[0];
+        const status = row.getAttribute('data-status');
+        
+        if (emailCell) {
+            const email = emailCell.textContent || emailCell.innerText;
+            const matchesSearch = email.toLowerCase().includes(filter);
+            const matchesTab = currentTab === 'all' || status === currentTab;
+            
+            row.style.display = matchesSearch && matchesTab ? '' : 'none';
+        }
+    }
+}
+
+// Initialize with 'all' tab
+showTab('all');
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Subscribe to Newsletter{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Subscribe to Our Newsletter</h1>
+    <p>Stay updated with our latest news and updates!</p>
+    
+    <form method="POST" id="subscribeForm">
+        <div class="form-group">
+            <input type="email" name="email" id="email" placeholder="Enter your email address" required>
+        </div>
+        
+        <div class="form-group terms-group">
+            <label class="checkbox-label">
+                <input type="checkbox" name="terms" id="terms" required>
+                I agree to the <a href="{{ url_for('terms') }}" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+            </label>
+        </div>
+        
+        <button type="submit" id="submitBtn" disabled>Subscribe</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const termsCheckbox = document.getElementById('terms');
+    const submitBtn = document.getElementById('submitBtn');
+
+    termsCheckbox.onchange = () => {
+        submitBtn.disabled = !termsCheckbox.checked;
+    };
+</script>
+{% endblock %}
